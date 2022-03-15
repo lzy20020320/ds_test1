@@ -30,7 +30,7 @@ public:
 
     int FirstOutAdjVex(int v) const;				 // 求有向网中顶点v的第一个邻接点
     int NextAdjVex(int v1, int v2) const;		 // 求有向网中顶点v1的相对于v2的下一个邻接点
-
+    bool CheckRow(int row, int source_vex);
 
     int CountOutDegree(int v) const;
     int CountInDegree(int v) const;
@@ -345,9 +345,33 @@ int AdjMatrixdirNetwork<ElemType>::CountInDegree(int v) const {
 
 template<class ElemType>
 bool AdjMatrixdirNetwork<ElemType>::hasCycle() {
+    bool flag = false;
+    for(int i = 0; i < vexNum; i++)
+    {
+        for(int j = 0; j < vexNum; j++)
+        {
+            if(arcs[i][j] == 1)
+                flag = CheckRow(j, i);
+        }
+        if(flag)
+            break;
+    }
+    return flag;
+}
 
-
-    return true;
+template<class ElemType>
+bool AdjMatrixdirNetwork<ElemType>::CheckRow(int row, int source_vex)
+{
+    for(int i = 0; i < vexNum; i++)
+    {
+        if(i == source_vex && arcs[row][i] != infinity)
+            return true;
+//		if(i == source_vex && arcs[row][i] == infinity)
+//			return false;
+        if(arcs[row][i] != infinity)
+            CheckRow(i, source_vex);
+    }
+    return false;
 }
 
 template<class ElemType>
