@@ -7,7 +7,5 @@ include_directories(.)
 
 add_executable(adj_list_dir_network
         AdjListDirNetwork.h
-        AdjListDirNetworkArc.h
-        AdjListDirNetworkVex.h
         Assistance.h
         TestAdjListDirNetwork.cpp)

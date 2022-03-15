@@ -352,13 +352,13 @@ bool AdjMatrixdirNetwork<ElemType>::hasCycle() {
 
 template<class ElemType>
 int AdjMatrixdirNetwork<ElemType>::FirstOutAdjVex(int v) const {
-    for(int i = 0;i<vexMaxNum;i++)
+    //TODO
 
 }
 
 template<class ElemType>
 int AdjMatrixdirNetwork<ElemType>::NextAdjVex(int v1, int v2) const {
-    return 0;
+    //TODO
 }
 
 
