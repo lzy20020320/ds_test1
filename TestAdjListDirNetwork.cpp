@@ -21,7 +21,7 @@ int main(void)
             for (int i = 0; i < n; i++)
                 if(i != j)  g.InsertArc(j, i, m[j][i]);
 
-        while (c != '9')	{
+        while (c != 'a')	{
             cout << endl << "1. 图清空.";
             cout << endl << "2. 显示图.";
             cout << endl << "3. 删除顶点.";
@@ -31,7 +31,7 @@ int main(void)
             cout << endl << "7. 求顶点的出度.";
             cout << endl << "8. 求顶点的入度.";
             cout << endl << "9. 是否有环.";
-            cout << endl << "10. 退出";
+            cout << endl << "a. 退出";
 
             cout << endl << "选择功能(1~7):";
             cin >> c;
