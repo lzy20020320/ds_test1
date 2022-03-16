@@ -6,11 +6,11 @@ int main(void)
     {
         char vexs[] = {'A', 'B', 'C', 'D', 'E'};
         int m[5][5] = {
-                {0, DEFAULT_INFINITY, DEFAULT_INFINITY, DEFAULT_INFINITY, DEFAULT_INFINITY},
-                {1, 0, 1, 1, 0},
-                {DEFAULT_INFINITY, 0, 0, 2, 1},
-                {1, 1, 1, 0, 0},
-                {1, 0, 1, 0, 0},
+                {0,  1, DEFAULT_INFINITY, DEFAULT_INFINITY, DEFAULT_INFINITY},
+                { 1, 0, DEFAULT_INFINITY, DEFAULT_INFINITY, DEFAULT_INFINITY},
+                {DEFAULT_INFINITY, DEFAULT_INFINITY, 0,DEFAULT_INFINITY, DEFAULT_INFINITY},
+                {DEFAULT_INFINITY, 1, DEFAULT_INFINITY, 0, DEFAULT_INFINITY},
+                {1, 1, DEFAULT_INFINITY, 1, 0},
         };
         char c = '0', e, e1, e2;
         int n = 5, v, v1, v2,w;
@@ -82,10 +82,11 @@ int main(void)
                     cout<<g.CountInDegree(v)<<endl;
                     break;
                 case '9':
+
                     if(g.hasCycle())
-                        cout << endl << "有环";
+                        cout<<"有环";
                     else
-                        cout << endl << "没环";
+                        cout<<"没环";
                     break;
             }
         }
@@ -95,6 +96,6 @@ int main(void)
         err.Show();						// 显示异常信息
     }
 
-    system("PAUSE");					// 调用库函数system()
+    //system("PAUSE");					// 调用库函数system()
     return 0;
 }

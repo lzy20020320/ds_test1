@@ -1,6 +1,7 @@
 #ifndef __ADJ_MATRIX_UNDIR_GRAPH_H__
 #define __ADJ_MATRIX_UNDIR_GRAPH_H__
 #include <iostream>
+#include <queue>
 #include "Assistance.h"
 using namespace std;
 
@@ -23,13 +24,14 @@ public:
     ~AdjMatrixdirNetwork();					// 析构函数
     void Clear();			              // 清空图
     bool IsEmpty();                 // 判断有向图是否为空
+    bool hasCycle(int v);
     bool hasCycle();
     Status GetElem(int v, ElemType &d) const;// 求顶点的 元素值
     int GetVexNum() const;					// 返回顶点个数
     int GetArcNum() const;					// 返回边数
 
     int FirstOutAdjVex(int v) const;				 // 求有向网中顶点v的第一个邻接点
-    int NextAdjVex(int v1, int v2) const;		 // 求有向网中顶点v1的相对于v2的下一个邻接点
+    int NextOutAdjVex(int v1, int v2) const;		 // 求有向网中顶点v1的相对于v2的下一个邻接点
     bool CheckRow(int row, int source_vex);
 
     int CountOutDegree(int v) const;
@@ -344,20 +346,41 @@ int AdjMatrixdirNetwork<ElemType>::CountInDegree(int v) const {
     return in_degree;
 }
 
+//template<class ElemType>
+//bool AdjMatrixdirNetwork<ElemType>::hasCycle() {
+//    bool flag = false;
+//    for(int i = 0; i < vexNum; i++)
+//    {
+//        for(int j = 0; j < vexNum; j++)
+//        {
+//            if(arcs[i][j] == 1)
+//                flag = CheckRow(j, i);
+//        }
+//        if(flag)
+//            break;
+//    }
+//    return flag;
+//}
+
+
 template<class ElemType>
-bool AdjMatrixdirNetwork<ElemType>::hasCycle() {
-    bool flag = false;
-    for(int i = 0; i < vexNum; i++)
-    {
-        for(int j = 0; j < vexNum; j++)
-        {
-            if(arcs[i][j] == 1)
-                flag = CheckRow(j, i);
+bool AdjMatrixdirNetwork<ElemType>::hasCycle(int v) {
+    std::queue<int> elem_queue;
+    elem_queue.push(v);
+    for(int i = 0;i<vexNum && !elem_queue.empty();i++){
+        int temp,next_adj;
+        temp = elem_queue.front();
+        elem_queue.pop();
+        next_adj = this->FirstOutAdjVex(temp);
+        if(next_adj == v)    return true;
+        if(next_adj != -1)  elem_queue.push(next_adj);
+        while(next_adj != -1){
+            next_adj = NextOutAdjVex(temp,next_adj);
+            if(next_adj == v)    return true;
+            if(next_adj != -1)  elem_queue.push(next_adj);
         }
-        if(flag)
-            break;
     }
-    return flag;
+    return false;
 }
 
 template<class ElemType>
@@ -377,13 +400,31 @@ bool AdjMatrixdirNetwork<ElemType>::CheckRow(int row, int source_vex)
 
 template<class ElemType>
 int AdjMatrixdirNetwork<ElemType>::FirstOutAdjVex(int v) const {
-    //TODO
+    if (v<0 && v>=vexNum)
+        return -1;
+    for(int i = 0;i<vexNum;i++)
+        if(arcs[v][i] != infinity && arcs[v][i] != 0)
+            return i;
+    return -1;
 
 }
 
 template<class ElemType>
-int AdjMatrixdirNetwork<ElemType>::NextAdjVex(int v1, int v2) const {
-    //TODO
+int AdjMatrixdirNetwork<ElemType>::NextOutAdjVex(int v1, int v2) const {
+    if (v2<0 && v2>=vexNum)
+        return -1;
+    for(int i = v2 + 1;i<vexNum;i++)
+        if(arcs[v1][i] != infinity && arcs[v1][i] != 0)
+            return i;
+    return -1;
+}
+
+template<class ElemType>
+bool AdjMatrixdirNetwork<ElemType>::hasCycle() {
+    for(int i = 0 ;i<vexNum;i++)
+        if(hasCycle(i)) return true;
+
+    return false;
 }
 
 
