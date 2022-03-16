@@ -17,14 +17,14 @@ private:
 public:
 // 邻接矩阵类型的方法声明:
     AdjMatrixdirNetwork(ElemType es[], int vertexNum, int vertexMaxNum = DEFAULT_SIZE,int inf = DEFAULT_INFINITY);
-    // 以数组es[]为顶点,顶点个数为vertexNum,允许的顶点最大数目为vertexMaxNum,边数为0的无向图
+    // 以数组es[]为顶点,顶点个数为vertexNum,允许的顶点最大数目为vertexMaxNum,边数为0的有向图
     explicit AdjMatrixdirNetwork(int vertexMaxNum = DEFAULT_SIZE,int inf = INFINITY);
-    // 构造允许的顶点最大数目为vertexMaxNum,边数为0的无向图
+    // 构造允许的顶点最大数目为vertexMaxNum,边数为0的有向图
     ~AdjMatrixdirNetwork();					// 析构函数
     void Clear();			              // 清空图
-    bool IsEmpty();                 // 判断无向图是否为空
+    bool IsEmpty();                 // 判断有向图是否为空
     bool hasCycle();
-    Status GetElem(int v, ElemType &d) const;// 求顶点的元素值
+    Status GetElem(int v, ElemType &d) const;// 求顶点的 元素值
     int GetVexNum() const;					// 返回顶点个数
     int GetArcNum() const;					// 返回边数
 
@@ -42,13 +42,13 @@ public:
     AdjMatrixdirNetwork(const AdjMatrixdirNetwork<ElemType> &g);	// 复制构造函数
     AdjMatrixdirNetwork<ElemType> &operator =(const AdjMatrixdirNetwork<ElemType> &g);
     // 赋值语句重载
-    void Display();	                         // 显示邻接矩阵无向图
+    void Display();	                         // 显示邻接矩阵有向图
 };
 
-// 无向图的邻接矩阵类的实现部分
+// 有向图的邻接矩阵类的实现部分
 template <class ElemType>
 AdjMatrixdirNetwork<ElemType>::AdjMatrixdirNetwork(ElemType es[], int vertexNum, int vertexMaxNum, int inf)
-// 操作结果：构造数据元素为es[],顶点个数为vertexNum,允许的顶点最大数目为vertexMaxNum,边数为0的无向图
+// 操作结果：构造数据元素为es[],顶点个数为vertexNum,允许的顶点最大数目为vertexMaxNum,边数为0的有向图
 
 {
     if (vertexMaxNum < 0)
@@ -81,7 +81,7 @@ AdjMatrixdirNetwork<ElemType>::AdjMatrixdirNetwork(ElemType es[], int vertexNum,
 
 template <class ElemType>
 AdjMatrixdirNetwork<ElemType>::AdjMatrixdirNetwork(int vertexMaxNum, int inf)
-// 操作结果：构造允许顶点的最大数目为vertexMaxNum的空无向图
+// 操作结果：构造允许顶点的最大数目为vertexMaxNum的空有向图
 {
     if (vertexMaxNum < 0)
         throw Error("允许的顶点最大数目不能为负!");  // 抛出异常
@@ -100,7 +100,7 @@ AdjMatrixdirNetwork<ElemType>::AdjMatrixdirNetwork(int vertexMaxNum, int inf)
 
 template <class ElemType>
 void AdjMatrixdirNetwork<ElemType>::Clear()
-// 操作结果：把无向图的顶点数和边数设置为0.
+// 操作结果：把有向图的顶点数和边数设置为0.
 {
     vexNum = 0;
     arcNum = 0;
@@ -108,7 +108,7 @@ void AdjMatrixdirNetwork<ElemType>::Clear()
 
 template <class ElemType>
 bool AdjMatrixdirNetwork<ElemType>::IsEmpty()
-// 操作结果：如果无向图为空返回true,否则返回false.
+// 操作结果：如果有向图为空返回true,否则返回false.
 {
     return vexNum == 0;
 }
@@ -188,7 +188,7 @@ void AdjMatrixdirNetwork<ElemType>::InsertArc(int v1, int v2, int weight)
 
 
 
-    if (arcs[v1][v2] == infinity)	{	  // 原无向图中没有边(v1, v2)
+    if (arcs[v1][v2] == infinity)	{	  // 原有向图中没有边(v1, v2)
         arcNum++;
         if(weight<infinity)
             arcs[v1][v2] = weight;
@@ -235,7 +235,7 @@ void AdjMatrixdirNetwork<ElemType>::DeleteArc(int v1, int v2)
     if (v2 < 0 || v2 >= vexNum)
         throw Error("v2不合法!");	// 抛出异常
 
-    if (arcs[v1][v2] != infinity)	{	// 原无向图存在边(v1, v2)
+    if (arcs[v1][v2] != infinity)	{	// 原有向图存在边(v1, v2)
         arcNum--;
         arcs[v1][v2] = infinity;
     }
@@ -244,7 +244,7 @@ void AdjMatrixdirNetwork<ElemType>::DeleteArc(int v1, int v2)
 
 template <class ElemType>
 AdjMatrixdirNetwork<ElemType>::AdjMatrixdirNetwork(const AdjMatrixdirNetwork<ElemType> &g)
-// 操作结果：由无向图的邻接矩阵g构造新无向图的邻接矩阵g——复制构造函数
+// 操作结果：由有向图的邻接矩阵g构造新有向图的邻接矩阵g——复制构造函数
 {
     vexNum = g.vexNum;
     vexMaxNum = g.vexMaxNum;
@@ -267,7 +267,7 @@ AdjMatrixdirNetwork<ElemType>::AdjMatrixdirNetwork(const AdjMatrixdirNetwork<Ele
 
 template <class ElemType>
 AdjMatrixdirNetwork<ElemType> &AdjMatrixdirNetwork<ElemType>::operator =(const AdjMatrixdirNetwork<ElemType> &g)
-// 操作结果：将无向图的邻接矩阵g赋值给当前无向图的邻接矩阵——赋值语句重载
+// 操作结果：将有向图的邻接矩阵g赋值给当前有向图的邻接矩阵——赋值语句重载
 {
     if (&g != this)	{
         delete []vertexes;				// 释放顶点数据
@@ -298,7 +298,7 @@ AdjMatrixdirNetwork<ElemType> &AdjMatrixdirNetwork<ElemType>::operator =(const A
 
 template <class ElemType>
 void AdjMatrixdirNetwork<ElemType>::Display()
-// 操作结果: 显示邻接矩阵无向图
+// 操作结果: 显示邻接矩阵有向图
 {
 
     for (int v = 0; v < vexNum; v++)
