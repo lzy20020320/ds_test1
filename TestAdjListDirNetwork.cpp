@@ -82,8 +82,14 @@ int main(void)
                     cout<<g.CountInDegree(v)<<endl;
                     break;
                 case '9':
-
+                    std::cout << "LiZhengYu: ";
                     if(g.hasCycle())
+                        cout<<"有环";
+                    else
+                        cout<<"没环";
+                    std::cout << '\n';
+                    std::cout << "LiYunzhe: ";
+                    if(g.Cycle())
                         cout<<"有环";
                     else
                         cout<<"没环";

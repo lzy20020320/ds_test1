@@ -2,6 +2,7 @@
 #define __ADJ_MATRIX_UNDIR_GRAPH_H__
 #include <iostream>
 #include <queue>
+#include <vector>
 #include "Assistance.h"
 using namespace std;
 
@@ -26,6 +27,7 @@ public:
     bool IsEmpty();                 // 判断有向图是否为空
     bool hasCycle(int v);
     bool hasCycle();
+    bool Cycle();
     Status GetElem(int v, ElemType &d) const;// 求顶点的 元素值
     int GetVexNum() const;					// 返回顶点个数
     int GetArcNum() const;					// 返回边数
@@ -427,8 +429,39 @@ bool AdjMatrixdirNetwork<ElemType>::hasCycle() {
     return false;
 }
 
+template<class ElemType>
+bool AdjMatrixdirNetwork<ElemType>::Cycle()
+{
+    int cnt = 0;
+    queue<int> queue;
+    std::vector<int> in_degree;
+    for(int vex = 0; vex < vexNum; vex++)
+    {
+        in_degree.push_back(this->CountInDegree(vex));
+        if(in_degree[vex] == 0)
+            queue.push(vex);
+    }
+
+    while(!queue.empty())
+    {
+        int front_elem = queue.front();
+        queue.pop();
+        cnt ++;
+        for(int i = 0; i < vexNum; i++)
+        {
+            if (i == front_elem)
+                continue;
+            if (--in_degree[i] == 0)
+                queue.push(i);
+        }
+    }
+    if(cnt == vexNum)
+        return false;
+    else
+        return true;
+}
+
 
 #endif
-
 
 
