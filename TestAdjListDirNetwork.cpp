@@ -17,9 +17,9 @@ int main(void)
 
         AdjMatrixdirNetwork<char> g(vexs, n, 7);
 
-        for (int u = 0; u < n; u++)
-            for (int v = 0; v < n; v++)
-                if(v != u)  g.InsertArc(u, v, m[u][v]);
+        for (int j = 0; j < n; j++)
+            for (int i = 0; i < n; i++)
+                if(i != j)  g.InsertArc(j, i, m[j][i]);
 
         while (c != '9')	{
             cout << endl << "1. Í¼Çå¿Õ.";

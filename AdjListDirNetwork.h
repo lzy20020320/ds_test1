@@ -183,8 +183,9 @@ void AdjMatrixdirNetwork<ElemType>::InsertArc(int v1, int v2, int weight)
         throw Error("v2不合法!");	// 抛出异常
     if (v1 == v2)
         throw Error("v1不能等于v2!");		// 抛出异常
-    if (weight < 0 )
-        throw Error("权重不能小于0!");
+    if (weight <= 0 )
+        throw Error("两个不同顶点点之间的权重要大于0!");
+
 
 
     if (arcs[v1][v2] == infinity)	{	  // 原无向图中没有边(v1, v2)
