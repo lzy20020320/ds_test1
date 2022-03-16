@@ -366,18 +366,18 @@ int AdjMatrixdirNetwork<ElemType>::CountInDegree(int v) const {
 template<class ElemType>
 bool AdjMatrixdirNetwork<ElemType>::hasCycle(int v) {
     std::queue<int> elem_queue;
-    elem_queue.push(v);
-    for(int i = 0;i<vexNum && !elem_queue.empty();i++){
-        int temp,next_adj;
+    elem_queue.push(v);                                     // 队列中存接下来要走的节点
+    for(int i = 0;i<vexNum && !elem_queue.empty();i++){     // 如果存在环那么路径长度<=vexNum，当队列空说明走到尽头走不下去了
+        int temp,next_Vex;                                  // next_Vex 为该节点可以走到哪个及诶点
         temp = elem_queue.front();
         elem_queue.pop();
-        next_adj = this->FirstOutAdjVex(temp);
-        if(next_adj == v)    return true;
-        if(next_adj != -1)  elem_queue.push(next_adj);
-        while(next_adj != -1){
-            next_adj = NextOutAdjVex(temp,next_adj);
-            if(next_adj == v)    return true;
-            if(next_adj != -1)  elem_queue.push(next_adj);
+        next_Vex = this->FirstOutAdjVex(temp);
+        if(next_Vex == v)    return true;                   // 走到最初的点就存在圈
+        if(next_Vex != -1)  elem_queue.push(next_Vex);
+        while(next_Vex != -1){
+            next_Vex = NextOutAdjVex(temp, next_Vex);
+            if(next_Vex == v)    return true;
+            if(next_Vex != -1)  elem_queue.push(next_Vex);
         }
     }
     return false;
