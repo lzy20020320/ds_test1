@@ -214,7 +214,7 @@ void AdjMatrixdirNetwork<ElemType>::DeleteVex(const ElemType &d)
         throw Error("图中不存在要删除的顶点!");	// 抛出异常
 
     for (int u = 0; u < vexNum; u++)                // 删除与顶点d相关联的边
-        if (arcs[v][u] == 1) {
+        if (arcs[v][u] != infinity && v != u) {
             arcNum--;
             arcs[v][u] = infinity;
             arcs[u][v] = infinity;
