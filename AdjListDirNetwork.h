@@ -334,7 +334,7 @@ int AdjMatrixdirNetwork<ElemType>::CountOutDegree(int v) const {
     if (v < 0 || v >= vexNum)
         throw Error("v1不合法!");	// 抛出异常
     for (int u = 0; u < vexNum; u++)
-        if(arcs[v][u] != infinity)  out_degree++;
+        if(arcs[v][u] != infinity && arcs[v][u] != 0 )  out_degree++;
     return out_degree;
 }
 
@@ -344,7 +344,7 @@ int AdjMatrixdirNetwork<ElemType>::CountInDegree(int v) const {
     if (v < 0 || v >= vexNum)
         throw Error("v1不合法!");	// 抛出异常
     for (int u = 0; u < vexNum; u++)
-        if(arcs[u][v] != infinity)  in_degree++;
+        if(arcs[u][v] != infinity && arcs[u][v] != 0)  in_degree++;
     return in_degree;
 }
 
