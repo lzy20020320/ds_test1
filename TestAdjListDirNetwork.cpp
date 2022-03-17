@@ -6,11 +6,11 @@ int main(void)
     {
         char vexs[] = {'A', 'B', 'C', 'D', 'E'};
         int m[5][5] = {
-                {0,  1, DEFAULT_INFINITY, DEFAULT_INFINITY, DEFAULT_INFINITY},
-                { 1, 0, DEFAULT_INFINITY, DEFAULT_INFINITY, DEFAULT_INFINITY},
-                {DEFAULT_INFINITY, DEFAULT_INFINITY, 0,DEFAULT_INFINITY, DEFAULT_INFINITY},
-                {DEFAULT_INFINITY, 1, DEFAULT_INFINITY, 0, DEFAULT_INFINITY},
-                {1, 1, DEFAULT_INFINITY, 1, 0},
+                {0               , 5               , 5               , DEFAULT_INFINITY, 10              },
+                {DEFAULT_INFINITY, 0               , 100             , DEFAULT_INFINITY, 8               },
+                {DEFAULT_INFINITY, DEFAULT_INFINITY, 0               , 4               , 5               },
+                {DEFAULT_INFINITY, DEFAULT_INFINITY, DEFAULT_INFINITY, 0               , 2               },
+                {DEFAULT_INFINITY, 1               , DEFAULT_INFINITY, DEFAULT_INFINITY, 0               },
         };
         char c = '0', e, e1, e2;
         int n = 5, v, v1, v2,w;
@@ -20,6 +20,19 @@ int main(void)
         for (int j = 0; j < n; j++)
             for (int i = 0; i < n; i++)
                 if(i != j)  g.InsertArc(j, i, m[j][i]);
+
+        vector<int> pre_points,distance;
+        cout<< "E到各点的最短距离"<<endl;
+        g.Dijkstra(4,pre_points,distance);
+        for(auto &point:pre_points)
+            cout<<point<<'\t';
+        cout<<endl;
+        for(auto &dis:distance)
+            if(dis==DEFAULT_INFINITY)
+                cout<<"INFINITY"<<'\t';
+            else
+                cout<<dis<<'\t';
+        cout<<endl;
 
         while (c != 'a')	{
             cout << endl << "1. 图清空.";
@@ -31,6 +44,7 @@ int main(void)
             cout << endl << "7. 求顶点的出度.";
             cout << endl << "8. 求顶点的入度.";
             cout << endl << "9. 是否有环.";
+            cout << endl << "0. 求次短路径";
             cout << endl << "a. 退出";
 
             cout << endl << "选择功能(1~7):";
@@ -101,6 +115,23 @@ int main(void)
                     end = GetTickCount();
                     std::cout << "run time is " << double(end - start)  << std::endl;
                     break;
+                case '0':{
+                    char v1,v2;
+                    cout<<"请输入起点和终点:";
+                    bool flag(true);
+                    while(flag){
+                        cin>>v1>>v2;
+                        if(cin.fail()){
+                            cin.clear();//把可恢复的流都恢复
+                            cin.ignore();//注意这个函数的原型是istream& ignore(streamsize n=1;int delim=EOF)
+                            //读取前n个字符或者在遇到delim字符就停止，把读取的东西丢掉
+                            //这里相当于把换行符去掉
+                            cout<<"输入错误请重新输入：";
+                        }else
+                            flag=false;
+                    }
+                    g.SecShortestPath(g.GetOrder(v1),g.GetOrder(v2));
+                }
             }
         }
     }

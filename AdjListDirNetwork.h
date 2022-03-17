@@ -26,9 +26,9 @@ public:
     ~AdjMatrixdirNetwork();					// 析构函数
     void Clear();			              // 清空图
     bool IsEmpty();                 // 判断有向图是否为空
-    bool hasCycle(int v);
-    bool hasCycle();
-    bool Cycle();
+    bool hasCycle(int v);   /// TODO 记得写注释！！
+    bool hasCycle();    /// 记得写注释！！
+    bool Cycle();   /// 记得写注释！！
     Status GetElem(int v, ElemType &d) const;// 求顶点的 元素值
     int GetVexNum() const;					// 返回顶点个数
     int GetArcNum() const;					// 返回边数
@@ -36,7 +36,9 @@ public:
     int FirstOutAdjVex(int v) const;				 // 求有向网中顶点v的第一个邻接点
     int NextOutAdjVex(int v1, int v2) const;		 // 求有向网中顶点v1的相对于v2的下一个邻接点
     bool CheckRow(int row, int source_vex);
+    void SecShortestPath(int v1,int v2);    // 输出两点之间的第二短路径
 
+    void Dijkstra(int start,vector<int> &pre_point,vector<int> &distance);  // 最短路径算法，pre_point为前驱顶点，distance为距离
     int CountOutDegree(int v) const;
     int CountInDegree(int v) const;
     int GetOrder(ElemType &d) const;// 求顶点的序号
@@ -471,6 +473,71 @@ bool AdjMatrixdirNetwork<ElemType>::Cycle()
         return false;
     else
         return true;
+}
+
+template<class ElemType>
+void AdjMatrixdirNetwork<ElemType>::Dijkstra(int start, vector<int> &pre_point, vector<int> &distance) {
+    bool flag[vexNum];
+    distance.clear();
+    pre_point.clear();
+    for(int i=0;i<vexNum;++i){
+        flag[i]=false;
+        distance.emplace_back(arcs[start][i]);    // 初始化距离
+        pre_point.emplace_back(start);  // 初始化前驱顶点为0
+    }
+    flag[start]=true, distance[start]=0; // 初始化起点
+    for(int i=1;i<vexNum;++i){     // 循环n-1次（除了自己）
+        int min_distance(infinity),point(0);
+        for(int j=0;j<vexNum;++j)   // 找到距离最近的点
+            if(!flag[j] && distance[j]<min_distance){
+                min_distance=distance[j];
+                point=j;
+            }
+        flag[point] = true;   // 标记已得到从start到point的最短路径
+        for(int j=0;j<vexNum;++j){
+            int start2next_distance = arcs[point][j] == infinity ? infinity : min_distance + arcs[point][j]; // 防止溢出
+            if(!flag[j] && start2next_distance < distance[j]){
+                distance[j]=start2next_distance;    // 若次路径更短则更新最短距离和前驱点
+                pre_point[j]=point;
+            }
+        }
+    }
+}
+
+template<class ElemType>
+void AdjMatrixdirNetwork<ElemType>::SecShortestPath(int v1, int v2) {
+    if(v1==-1 || v2==-1) cout<<"输入点不存在"<<endl;
+    auto *pre_points = new vector<int>[vexNum];     // 记录每个点的最短路径
+    auto *distances = new vector<int>[vexNum];
+    for(int i=0;i<vexNum;++i)
+        Dijkstra(i,pre_points[i],distances[i]);
+    int *begin_2_end_distance = new int[vexNum];
+    for(int i=0;i<vexNum;++i)
+        begin_2_end_distance[i]=(distances[v1][i]==infinity || distances[i][v2]==infinity) ?
+                infinity : distances[v1][i]+distances[i][v2];
+    int sec_min_mid_point=-1;  // 第二短路径的中间点与长度
+    for(int i=0,min_dis=infinity,min_mid_point=-1; i < vexNum; ++i)
+        if(min_dis > begin_2_end_distance[i]){
+            min_dis=begin_2_end_distance[i];
+            sec_min_mid_point=min_mid_point;
+            min_mid_point=i;
+        }else if(sec_min_mid_point==-1 || begin_2_end_distance[i]<begin_2_end_distance[sec_min_mid_point])
+            sec_min_mid_point=i;
+    if(sec_min_mid_point==-1 && begin_2_end_distance[sec_min_mid_point]!=infinity)
+        cout<<" not found second shortest path between "<<vertexes[v1]<<" and "<<vertexes[v2];
+    else{
+        for(int i=v2;i!=sec_min_mid_point;++i){
+            cout<<vertexes[i]<<" <- ";
+            i=pre_points[sec_min_mid_point][i];
+        }
+        cout<<vertexes[sec_min_mid_point];
+        for(int i=sec_min_mid_point;i!=v1;++i){
+            cout<<" <- "<<vertexes[i];
+            i=pre_points[v1][i];
+        }
+        if(sec_min_mid_point!=v1)
+            cout<<" <- "<<vertexes[v1];
+    }
 }
 
 
