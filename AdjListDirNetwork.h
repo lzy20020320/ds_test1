@@ -3,6 +3,7 @@
 #include <iostream>
 #include <queue>
 #include <vector>
+#include <ctime>
 #include "Assistance.h"
 using namespace std;
 
@@ -432,9 +433,16 @@ bool AdjMatrixdirNetwork<ElemType>::hasCycle() {
 template<class ElemType>
 bool AdjMatrixdirNetwork<ElemType>::Cycle()
 {
+    /// 思路：参考拓扑排序
+    /// 将所有入度为0的点入队；每次从队列中pop一个顶点，直至为空；
+    /// 遍历所有与pop出来这个顶点相连的顶点，并将相连顶点入度减一，若减一后入度为0，入队。
+    /// 若最终cnt == 顶点个数，说明所有顶点都被访问到，说明没cycle，否则说明有顶点入度不为1.
     int cnt = 0;
     queue<int> queue;
     std::vector<int> in_degree;
+    std::vector<int> linked_vex;
+    /// 数据准备
+    // 算各顶点入度
     for(int vex = 0; vex < vexNum; vex++)
     {
         in_degree.push_back(this->CountInDegree(vex));
@@ -444,14 +452,18 @@ bool AdjMatrixdirNetwork<ElemType>::Cycle()
 
     while(!queue.empty())
     {
+        linked_vex.clear();
         int front_elem = queue.front();
+        for(int i = 0; i < vexNum; i++)          // 找出与pop顶点相连的顶点，push入linked_vex
+        {
+            if(arcs[front_elem][i] != infinity and front_elem != i)
+                linked_vex.push_back(i);
+        }
         queue.pop();
         cnt ++;
-        for(int i = 0; i < vexNum; i++)
+        for(int i : linked_vex)                   // 遍历相连结点，删边
         {
-            if (i == front_elem)
-                continue;
-            if (--in_degree[i] == 0)
+            if (--in_degree[i] == 0)              // 若删边后，结点入度为0，push入队
                 queue.push(i);
         }
     }

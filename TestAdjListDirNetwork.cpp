@@ -1,5 +1,5 @@
 #include "AdjListDirNetwork.h"		// 邻接矩阵有向图
-
+#include "windows.h"
 int main(void)
 {
     try									// 用try封装可能出现异常的代码
@@ -82,17 +82,24 @@ int main(void)
                     cout<<g.CountInDegree(v)<<endl;
                     break;
                 case '9':
+                    DWORD start, end;
+                    start = GetTickCount();
                     std::cout << "LiZhengYu: ";
                     if(g.hasCycle())
                         cout<<"有环";
                     else
                         cout<<"没环";
+                    end = GetTickCount();
+                    std::cout << "run time is " << double(end - start) << std::endl;
                     std::cout << '\n';
                     std::cout << "LiYunzhe: ";
+                    start = GetTickCount();;
                     if(g.Cycle())
                         cout<<"有环";
                     else
                         cout<<"没环";
+                    end = GetTickCount();
+                    std::cout << "run time is " << double(end - start)  << std::endl;
                     break;
             }
         }
