@@ -39,6 +39,7 @@ public:
     void SecShortestPath(int v1,int v2);    // 输出两点之间的第二短路径
 
     void Dijkstra(int start,vector<int> &pre_point,vector<int> &distance);  // 最短路径算法，pre_point为前驱顶点，distance为距离
+    void DijkstraSec(int start,vector<int> &pre_point,vector<int> &min, vector<int> &sec_min, vector<int> &pre_point_sec);
     int CountOutDegree(int v) const;
     int CountInDegree(int v) const;
     int GetOrder(ElemType &d) const;// 求顶点的序号
@@ -505,38 +506,85 @@ void AdjMatrixdirNetwork<ElemType>::Dijkstra(int start, vector<int> &pre_point, 
 }
 
 template<class ElemType>
-void AdjMatrixdirNetwork<ElemType>::SecShortestPath(int v1, int v2) {
-    if(v1==-1 || v2==-1) cout<<"输入点不存在"<<endl;
-    auto *pre_points = new vector<int>[vexNum];     // 记录每个点的最短路径
-    auto *distances = new vector<int>[vexNum];
-    for(int i=0;i<vexNum;++i)
-        Dijkstra(i,pre_points[i],distances[i]);
-    int *begin_2_end_distance = new int[vexNum];
-    for(int i=0;i<vexNum;++i)
-        begin_2_end_distance[i]=(distances[v1][i]==infinity || distances[i][v2]==infinity) ?
-                infinity : distances[v1][i]+distances[i][v2];
-    int sec_min_mid_point=-1;  // 第二短路径的中间点与长度
-    for(int i=0,min_dis=infinity,min_mid_point=-1; i < vexNum; ++i)
-        if(min_dis > begin_2_end_distance[i]){
-            min_dis=begin_2_end_distance[i];
-            sec_min_mid_point=min_mid_point;
-            min_mid_point=i;
-        }else if(sec_min_mid_point==-1 || begin_2_end_distance[i]<begin_2_end_distance[sec_min_mid_point])
-            sec_min_mid_point=i;
-    if(sec_min_mid_point==-1 && begin_2_end_distance[sec_min_mid_point]!=infinity)
-        cout<<" not found second shortest path between "<<vertexes[v1]<<" and "<<vertexes[v2];
+void AdjMatrixdirNetwork<ElemType>::SecShortestPath(int start, int end) {
+    vector<int> min_distance,pre_point,sec_min_distance,pre_point_sec;
+    bool flag[vexNum];
+    for(int i=0;i<vexNum;++i){
+        flag[i]=false;
+        min_distance.emplace_back(arcs[start][i]);    // 初始化距离
+        pre_point.emplace_back(start);  // 初始化前驱顶点为0
+        sec_min_distance.emplace_back(infinity);
+        pre_point_sec.emplace_back(start);
+    }
+    flag[start]=true, min_distance[start]=0; // 初始化起点
+    for(int i=1;i<vexNum;++i){     // 循环n-1次（除了自己）
+        int min_distance_from_start(infinity),point(0);
+        for(int j=0;j<vexNum;++j)   // 找到距离最近的点
+            if(!flag[j] && min_distance[j] < min_distance_from_start){
+                min_distance_from_start=min_distance[j];
+                point=j;
+            }
+        flag[point] = true;   // 标记已得到从start到point的最短路径
+        for(int j=0;j<vexNum;++j){
+            int start2next_distance = arcs[point][j] == infinity ? infinity : min_distance_from_start + arcs[point][j]; // 防止溢出
+            if(!flag[j] && start2next_distance < min_distance[j]){
+                sec_min_distance[j]=min_distance[j];
+                pre_point_sec[j]=pre_point[j];
+                min_distance[j]=start2next_distance;    // 若次路径更短则更新最短距离和前驱点
+                pre_point[j]=point;
+            }else if(start2next_distance < sec_min_distance[j] && start2next_distance > min_distance[j]){   // 筛选第二长的
+                sec_min_distance[j] = start2next_distance;
+                pre_point_sec[j]=point;
+            }
+        }
+    }
+    if(sec_min_distance[end]==infinity) // 输出
+        cout<<"not found second shortest path"<<endl;
     else{
-        for(int i=v2;i!=sec_min_mid_point;++i){
-            cout<<vertexes[i]<<" <- ";
-            i=pre_points[sec_min_mid_point][i];
-        }
-        cout<<vertexes[sec_min_mid_point];
-        for(int i=sec_min_mid_point;i!=v1;++i){
+        cout<<vertexes[end];
+        for(int i=pre_point_sec[end];i != start;i = (sec_min_distance[i] > min_distance[i]) ?
+                pre_point[i]:pre_point_sec[i])
             cout<<" <- "<<vertexes[i];
-            i=pre_points[v1][i];
+        cout<<" <- "<<vertexes[start]<<endl;
+    }
+}
+
+template<class ElemType>
+void AdjMatrixdirNetwork<ElemType>::DijkstraSec(int start, vector<int> &pre_point,
+                                                vector<int> &min, vector<int> &sec_min, vector<int> &pre_point_sec) {
+    bool flag[vexNum];
+    min.clear();
+    pre_point.clear();
+    sec_min.clear();
+    pre_point_sec.clear();
+    for(int i=0;i<vexNum;++i){
+        flag[i]=false;
+        min.emplace_back(arcs[start][i]);    // 初始化距离
+        pre_point.emplace_back(start);  // 初始化前驱顶点为0
+        sec_min.template emplace_back(infinity);
+        pre_point_sec.template emplace_back(start);
+    }
+    flag[start]=true, min[start]=0; // 初始化起点
+    for(int i=1;i<vexNum;++i){     // 循环n-1次（除了自己）
+        int min_distance(infinity),point(0);
+        for(int j=0;j<vexNum;++j)   // 找到距离最近的点
+            if(!flag[j] && min[j]<min_distance){
+                min_distance=min[j];
+                point=j;
+            }
+        flag[point] = true;   // 标记已得到从start到point的最短路径
+        for(int j=0;j<vexNum;++j){
+            int start2next_distance = arcs[point][j] == infinity ? infinity : min_distance + arcs[point][j]; // 防止溢出
+            if(!flag[j] && start2next_distance < min[j]){
+                sec_min[j]=min[j];
+                pre_point_sec[j]=pre_point[j];
+                min[j]=start2next_distance;    // 若次路径更短则更新最短距离和前驱点
+                pre_point[j]=point;
+            }else if(start2next_distance < sec_min[j] && start2next_distance >min[j]){
+                sec_min[j] = start2next_distance;
+                pre_point_sec[j]=point;
+            }
         }
-        if(sec_min_mid_point!=v1)
-            cout<<" <- "<<vertexes[v1];
     }
 }
 

@@ -21,9 +21,9 @@ int main(void)
             for (int i = 0; i < n; i++)
                 if(i != j)  g.InsertArc(j, i, m[j][i]);
 
-        vector<int> pre_points,distance;
-        cout<< "E到各点的最短距离"<<endl;
-        g.Dijkstra(4,pre_points,distance);
+        vector<int> pre_points,distance,sec,pre_points_sec;
+        cout<< "A到各点的最短距离"<<endl;
+        g.DijkstraSec(0,pre_points,distance,sec,pre_points_sec);
         for(auto &point:pre_points)
             cout<<point<<'\t';
         cout<<endl;
@@ -33,6 +33,14 @@ int main(void)
             else
                 cout<<dis<<'\t';
         cout<<endl;
+        for(auto &point:pre_points_sec)
+            cout<<point<<'\t';
+        cout<<endl;
+        for(auto &dis:sec)
+            if(dis==DEFAULT_INFINITY)
+                cout<<"INFINITY"<<'\t';
+            else
+                cout<<dis<<'\t';
 
         while (c != 'a')	{
             cout << endl << "1. 图清空.";
