@@ -562,6 +562,7 @@ void AdjMatrixdirNetwork<ElemType>::SecShortestPath(int start, int end) {
         sec_min_distance.emplace_back(infinity);
         pre_point_sec.emplace_back(start);
     }
+    pre_point[start] = -1;
     flag_min[start]=true, min_distance[start]=0; // 初始化起点
     for(int i=1;i<vexNum;++i){     // 循环n-1次（除了自己）
         int min_distance_from_start(infinity),vex(0);   // 到“此点”的最短路径，“此点”
@@ -610,7 +611,7 @@ void AdjMatrixdirNetwork<ElemType>::SecShortestPath(int start, int end) {
     else{
         cout<<"长度为 "<<sec_min_distance[end]<<endl<<vertexes[end];
         bool now_is_shortest_path=false;  // 当前顶点走的是否为最短路径
-        for(int pre=pre_point_sec[end],tail=end; pre != start;){
+        for(int pre=pre_point_sec[end],tail=end; pre != -1;){
             cout<<" <- "<<vertexes[pre];
             if(!now_is_shortest_path && pre_point_sec_type[tail]){
                 tail=pre;
@@ -623,7 +624,7 @@ void AdjMatrixdirNetwork<ElemType>::SecShortestPath(int start, int end) {
             }
 
         }
-        cout<<" <- "<<vertexes[start]<<endl;
+        // cout<<" <- "<<vertexes[start]<<endl;
     }
     delete[] flag_min;
     delete[] flag_sec;
