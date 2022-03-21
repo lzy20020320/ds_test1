@@ -28,14 +28,22 @@ public:
     bool IsEmpty();                 // 判断有向图是否为空
     bool hasCycle(int v);   /// TODO 记得写注释！！
     bool hasCycle();    /// 记得写注释！！
-    bool Cycle();   /// 记得写注释！！
+
+    // Yunzhe Li
+    void Traverse(void (*Visit)(const ElemType &));                // 遍历
+    bool Cycle();                                                 // 判断是否有环，拓扑排序实现
+    bool CycleDFS(int v, std::vector<int> &output);               // 深度遍历是否有环
+    void SetTagVisited(int v);                                    // 标记顶点已经访问
+    Status GetTag(int v) const;                                   // 返回tag
+    void ClearTag();
+
+
     Status GetElem(int v, ElemType &d) const;// 求顶点的 元素值
     int GetVexNum() const;					// 返回顶点个数
     int GetArcNum() const;					// 返回边数
 
     int FirstOutAdjVex(int v) const;				 // 求有向网中顶点v的第一个邻接点
     int NextOutAdjVex(int v1, int v2) const;		 // 求有向网中顶点v1的相对于v2的下一个邻接点
-    bool CheckRow(int row, int source_vex);
     void SecShortestPath(int v1,int v2);    // 输出两点之间的第二短路径
 
     void Dijkstra(int start,vector<int> &pre_point,vector<int> &distance);  // 最短路径算法，pre_point为前驱顶点，distance为距离
@@ -352,22 +360,6 @@ int AdjMatrixdirNetwork<ElemType>::CountInDegree(int v) const {
     return in_degree;
 }
 
-//template<class ElemType>
-//bool AdjMatrixdirNetwork<ElemType>::hasCycle() {
-//    bool flag = false;
-//    for(int i = 0; i < vexNum; i++)
-//    {
-//        for(int j = 0; j < vexNum; j++)
-//        {
-//            if(arcs[i][j] == 1)
-//                flag = CheckRow(j, i);
-//        }
-//        if(flag)
-//            break;
-//    }
-//    return flag;
-//}
-
 
 template<class ElemType>
 bool AdjMatrixdirNetwork<ElemType>::hasCycle(int v) {
@@ -385,21 +377,6 @@ bool AdjMatrixdirNetwork<ElemType>::hasCycle(int v) {
             if(next_Vex == v)    return true;
             if(next_Vex != -1)  elem_queue.push(next_Vex);
         }
-    }
-    return false;
-}
-
-template<class ElemType>
-bool AdjMatrixdirNetwork<ElemType>::CheckRow(int row, int source_vex)
-{
-    for(int i = 0; i < vexNum; i++)
-    {
-        if(i == source_vex && arcs[row][i] != infinity)
-            return true;
-//		if(i == source_vex && arcs[row][i] == infinity)
-//			return false;
-        if(arcs[row][i] != infinity)
-            CheckRow(i, source_vex);
     }
     return false;
 }
@@ -433,6 +410,7 @@ bool AdjMatrixdirNetwork<ElemType>::hasCycle() {
     return false;
 }
 
+//-------------------------------------------------------------------------------------------------
 template<class ElemType>
 bool AdjMatrixdirNetwork<ElemType>::Cycle()
 {
@@ -440,11 +418,11 @@ bool AdjMatrixdirNetwork<ElemType>::Cycle()
     /// 将所有入度为0的点入队；每次从队列中pop一个顶点，直至为空；
     /// 遍历所有与pop出来这个顶点相连的顶点，并将相连顶点入度减一，若减一后入度为0，入队。
     /// 若最终cnt == 顶点个数，说明所有顶点都被访问到，说明没cycle，否则说明有顶点入度不为1.
+    /// 时间复杂度：O(n*n), 空间复杂度：O(1)
     int cnt = 0;
     queue<int> queue;
     std::vector<int> in_degree;
     std::vector<int> linked_vex;
-    /// 数据准备
     // 算各顶点入度
     for(int vex = 0; vex < vexNum; vex++)
     {
@@ -452,14 +430,13 @@ bool AdjMatrixdirNetwork<ElemType>::Cycle()
         if(in_degree[vex] == 0)
             queue.push(vex);
     }
-
     while(!queue.empty())
     {
         linked_vex.clear();
         int front_elem = queue.front();
         for(int i = 0; i < vexNum; i++)          // 找出与pop顶点相连的顶点，push入linked_vex
         {
-            if(arcs[front_elem][i] != infinity and front_elem != i)
+            if(arcs[front_elem][i] != infinity && front_elem != i)
                 linked_vex.push_back(i);
         }
         queue.pop();
@@ -477,8 +454,73 @@ bool AdjMatrixdirNetwork<ElemType>::Cycle()
 }
 
 template<class ElemType>
+void AdjMatrixdirNetwork<ElemType>::Traverse(void (*Visit) (const ElemType &))
+{
+    for(int vex : vertexes)
+    {
+        Visit(vex);
+    }
+}
+template<class ElemType>
+bool AdjMatrixdirNetwork<ElemType>::CycleDFS(int v, std::vector<int> &output)
+{
+    /// 深度优先遍历，求回路
+    /// 从v顶点开始，依次访问并DFS与之相连的顶点，访问到的顶点对其tag进行标记，当再次即将访问到已被访问到的顶点时，即：有环
+    /// 若DFS整个图后，未发现，则无环。
+    /// 对于删除顶点后的图，只能处理删除最后一个顶点的情况
+    /// 时间复杂度：O(n*n), 空间复杂度：O(n)
+    bool flag = false;              // 用于标记是否有环
+    int pre_vex = v;                // 用于记录上一个结点
+    SetTagVisited(v);               // 将访问到的结点标记为Visited
+
+    for(int w = FirstOutAdjVex(v); w != -1; w = NextOutAdjVex(v, w))    // 遍历与v点相连的顶点
+    {
+        if (GetTag(w) == VISITED && w != pre_vex)                // 若与v相连的顶点已经被访问过，且不是父顶点，则是回路的头（尾）
+        {
+            output.emplace_back(w);                             // 将头（尾）push_back
+            return true;
+        }
+        else if (GetTag(w) == UNVISITED)                         // 若未访问过
+        {
+            flag = CycleDFS(w, output);                     // 对与v相连的第一个点进行DFS
+            if(flag && output[0] == 0)                          // 用于回溯时记录回路尾顶点是否被访问过，若标记为1，则跳过
+            {
+                output.emplace_back(w);                         // 回溯时push_back经过的顶点
+                if(w == output[1])                              // 若再次回溯到相同的结点，则标记output的第一个元素，标记为1
+                    output[0] = 1;
+            }
+            return flag;
+        }
+    }
+    return false;
+}
+
+template<class ElemType>
+void AdjMatrixdirNetwork<ElemType>::SetTagVisited(int v)
+{
+    tag[v] = VISITED;
+}
+
+template<class ElemType>
+Status AdjMatrixdirNetwork<ElemType>::GetTag(int v) const
+{
+    return tag[v];
+}
+
+template<class ElemType>
+void AdjMatrixdirNetwork<ElemType>::ClearTag()
+{
+    for(int vex = 0; vex < vexNum; ++vex)
+        tag[vex] = UNVISITED;
+
+}
+
+
+//-------------------------------------------------------------------------------------------------
+
+template<class ElemType>
 void AdjMatrixdirNetwork<ElemType>::Dijkstra(int start, vector<int> &pre_point, vector<int> &distance) {
-    bool flag[vexNum];
+    bool *flag = new bool [vexNum];
     distance.clear();
     pre_point.clear();
     for(int i=0;i<vexNum;++i){
@@ -503,12 +545,13 @@ void AdjMatrixdirNetwork<ElemType>::Dijkstra(int start, vector<int> &pre_point, 
             }
         }
     }
+    delete[] flag;
 }
 
 template<class ElemType>
 void AdjMatrixdirNetwork<ElemType>::SecShortestPath(int start, int end) {
     vector<int> min_distance,pre_point,sec_min_distance,pre_point_sec;
-    bool flag[vexNum];
+    bool *flag = new bool [vexNum];
     for(int i=0;i<vexNum;++i){
         flag[i]=false;
         min_distance.emplace_back(arcs[start][i]);    // 初始化距离
@@ -547,12 +590,13 @@ void AdjMatrixdirNetwork<ElemType>::SecShortestPath(int start, int end) {
             cout<<" <- "<<vertexes[i];
         cout<<" <- "<<vertexes[start]<<endl;
     }
+    delete[] flag;
 }
 
 template<class ElemType>
 void AdjMatrixdirNetwork<ElemType>::DijkstraSec(int start, vector<int> &pre_point,
                                                 vector<int> &min, vector<int> &sec_min, vector<int> &pre_point_sec) {
-    bool flag[vexNum];
+    bool *flag = new bool [vexNum];
     min.clear();
     pre_point.clear();
     sec_min.clear();
@@ -561,8 +605,8 @@ void AdjMatrixdirNetwork<ElemType>::DijkstraSec(int start, vector<int> &pre_poin
         flag[i]=false;
         min.emplace_back(arcs[start][i]);    // 初始化距离
         pre_point.emplace_back(start);  // 初始化前驱顶点为0
-        sec_min.template emplace_back(infinity);
-        pre_point_sec.template emplace_back(start);
+        sec_min.emplace_back(infinity);
+        pre_point_sec.emplace_back(start);
     }
     flag[start]=true, min[start]=0; // 初始化起点
     for(int i=1;i<vexNum;++i){     // 循环n-1次（除了自己）
@@ -586,6 +630,7 @@ void AdjMatrixdirNetwork<ElemType>::DijkstraSec(int start, vector<int> &pre_poin
             }
         }
     }
+    delete[] flag;
 }
 
 

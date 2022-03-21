@@ -2,6 +2,7 @@
 #include "windows.h"
 int main(void)
 {
+    std::vector<int> output;
     try									// 用try封装可能出现异常的代码
     {
         char vexs[] = {'A', 'B', 'C', 'D', 'E'};
@@ -104,24 +105,34 @@ int main(void)
                     cout<<g.CountInDegree(v)<<endl;
                     break;
                 case '9':
-                    DWORD start, end;
-                    start = GetTickCount();
-                    std::cout << "LiZhengYu: ";
+                    std::cout << "广度优先求回路: ";
                     if(g.hasCycle())
                         cout<<"有环";
                     else
                         cout<<"没环";
-                    end = GetTickCount();
-                    std::cout << "run time is " << double(end - start) << std::endl;
                     std::cout << '\n';
-                    std::cout << "LiYunzhe: ";
-                    start = GetTickCount();;
+                    // -------------------------------------------------------------------
+                    std::cout << "DFS求回路: ";
+                    g.ClearTag();
+                    output.emplace_back(0);
+                    if(g.CycleDFS(0, output))
+                    {
+                        cout<<"有环 环为： ";
+                        std::cout << vexs[output[output.size()-1]];
+                        for(int i = output.size() -2 ; i >= 1; i--)
+                            std::cout  << " -> "<< vexs[output[i]];
+                        output.clear();
+                    }
+                    else
+                        cout<<"没环";
+                    std::cout << '\n';
+                    // -------------------------------------------------------------------
+                    std::cout << "拓扑排序求回路: ";
                     if(g.Cycle())
                         cout<<"有环";
                     else
                         cout<<"没环";
-                    end = GetTickCount();
-                    std::cout << "run time is " << double(end - start)  << std::endl;
+                    std::cout << '\n';
                     break;
                 case '0':{
                     char v1,v2;
