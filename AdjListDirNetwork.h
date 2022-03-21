@@ -551,46 +551,83 @@ void AdjMatrixdirNetwork<ElemType>::Dijkstra(int start, vector<int> &pre_point, 
 template<class ElemType>
 void AdjMatrixdirNetwork<ElemType>::SecShortestPath(int start, int end) {
     vector<int> min_distance,pre_point,sec_min_distance,pre_point_sec;
-    bool *flag = new bool [vexNum];
+    bool *flag_min = new bool [vexNum],*flag_sec = new bool[vexNum];
+    bool *pre_point_sec_type = new bool[vexNum]; // 次短路径前驱顶点是次短或最短(false为最短，true为次短)
     for(int i=0;i<vexNum;++i){
-        flag[i]=false;
+        flag_min[i]=false;
+        flag_sec[i]=false;
+        pre_point_sec_type[i]=false;
         min_distance.emplace_back(arcs[start][i]);    // 初始化距离
         pre_point.emplace_back(start);  // 初始化前驱顶点为0
         sec_min_distance.emplace_back(infinity);
         pre_point_sec.emplace_back(start);
     }
-    flag[start]=true, min_distance[start]=0; // 初始化起点
+    flag_min[start]=true, min_distance[start]=0; // 初始化起点
     for(int i=1;i<vexNum;++i){     // 循环n-1次（除了自己）
-        int min_distance_from_start(infinity),point(0);
-        for(int j=0;j<vexNum;++j)   // 找到距离最近的点
-            if(!flag[j] && min_distance[j] < min_distance_from_start){
+        int min_distance_from_start(infinity),vex(0);   // 到“此点”的最短路径，“此点”
+        for(int j=0;j<vexNum;++j)   // 找到距离最近的点（j）
+            if(!flag_min[j] && min_distance[j] < min_distance_from_start){
                 min_distance_from_start=min_distance[j];
-                point=j;
+                vex=j;
             }
-        flag[point] = true;   // 标记已得到从start到point的最短路径
+        flag_min[vex] = true;   // 标记已得到从start到point的最短路径
         for(int j=0;j<vexNum;++j){
-            int start2next_distance = arcs[point][j] == infinity ? infinity : min_distance_from_start + arcs[point][j]; // 防止溢出
-            if(!flag[j] && start2next_distance < min_distance[j]){
-                sec_min_distance[j]=min_distance[j];
-                pre_point_sec[j]=pre_point[j];
-                min_distance[j]=start2next_distance;    // 若次路径更短则更新最短距离和前驱点
-                pre_point[j]=point;
+            if(min_distance_from_start == infinity) continue;   // 防止不可达
+            int start2next_distance = arcs[vex][j] == infinity ? infinity : min_distance_from_start + arcs[vex][j]; // 防止溢出
+            if(!flag_min[j] && start2next_distance < min_distance[j]){
+                pre_point_sec_type[j] = false;  // 次短路径前驱为最短路径
+                sec_min_distance[j] = min_distance[j];
+                pre_point_sec[j] = pre_point[j];
+                min_distance[j] = start2next_distance;    // 若次路径更短则更新最短距离和前驱点
+                pre_point[j] = vex;
             }else if(start2next_distance < sec_min_distance[j] && start2next_distance > min_distance[j]){   // 筛选第二长的
+                pre_point_sec_type[j] = false;  // 次短路径前驱为最短路径
                 sec_min_distance[j] = start2next_distance;
-                pre_point_sec[j]=point;
+                pre_point_sec[j] = vex;
+            }
+        }
+    }
+    for(int i=0;i<vexNum;++i){  // 循环n次，处理次短路径
+        int min_distance_from_start(infinity),vex(0);   // 到“此点”的最短的次短路径，“此点”
+        for(int j=0;j<vexNum;++j)   // 找到距离最近的点（j）
+            if(!flag_sec[j] && sec_min_distance[j] < min_distance_from_start){
+                min_distance_from_start=sec_min_distance[j];
+                vex=j;
+            }
+        flag_sec[vex] = true;   // 标记已得到从start到point的最短的次短路径
+        for(int j=0;j<vexNum;++j){
+            if(min_distance_from_start == infinity) continue;
+            int start2next_distance = arcs[vex][j] == infinity ? infinity : min_distance_from_start + arcs[vex][j]; // 防止溢出
+            if(!flag_sec[j] && start2next_distance < sec_min_distance[j]){
+                pre_point_sec_type[j] = true;  // 次短路径前驱为次短路径
+                sec_min_distance[j] = start2next_distance;
+                pre_point_sec[j] = vex;
             }
         }
     }
     if(sec_min_distance[end]==infinity) // 输出
         cout<<"not found second shortest path"<<endl;
     else{
-        cout<<vertexes[end];
-        for(int i=pre_point_sec[end];i != start;i = (sec_min_distance[i] > min_distance[i]) ?
-                pre_point[i]:pre_point_sec[i])
-            cout<<" <- "<<vertexes[i];
+        cout<<"长度为 "<<sec_min_distance[end]<<endl<<vertexes[end];
+        bool now_is_shortest_path=false;  // 当前顶点走的是否为最短路径
+        for(int pre=pre_point_sec[end],tail=end; pre != start;){
+            cout<<" <- "<<vertexes[pre];
+            if(!now_is_shortest_path && pre_point_sec_type[tail]){
+                tail=pre;
+                pre = pre_point_sec[pre];
+            }
+            else {
+                tail=pre;
+                pre = pre_point[pre];
+                now_is_shortest_path=true;
+            }
+
+        }
         cout<<" <- "<<vertexes[start]<<endl;
     }
-    delete[] flag;
+    delete[] flag_min;
+    delete[] flag_sec;
+    delete[] pre_point_sec_type;
 }
 
 template<class ElemType>
